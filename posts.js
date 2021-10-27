@@ -7,6 +7,15 @@ define(["libFetch"],function(xhrFetch){
 		},
 		getBody: function(){
 			return this["p"]["content"]["rendered"];
+		},
+		getTags: function() {
+			return this["p"]["tags"];
+		},
+		hasTag: function(tag) {
+			let tags = this.getTags();
+			
+			
+			return tags.includes(tag);
 		}
 	};
 
@@ -15,11 +24,22 @@ define(["libFetch"],function(xhrFetch){
 	}
 	
 	Post.prototype = fn;
-
-	function getPosts(endpoint){
+	
+	
+	function getTags(endpoint) {
+	
+		var xhr = xhrFetch.fetch(endpoint,"json");
+		return xhr.then( function(jsonResp){
+			return jsonResp;
+		});
+	}
+	
+	
+	function getPosts(endpoint, tagId){
 		var xhr = xhrFetch.fetch(endpoint,"json");
 		return xhr.then( function(jsonResp){
 			var jsonRet = [];
+			console.log(jsonResp);
 			for(var i =0; i<jsonResp.length; i++){
 				jsonRet.push(new Post(jsonResp[i]));
 			}
@@ -29,6 +49,8 @@ define(["libFetch"],function(xhrFetch){
 			var htmlRet = [];
 			
 			for(var i = 0; i<posts.length; i++){
+				let thePost = posts[i];
+				if(!thePost.hasTag(tagId)) continue;
 				htmlRet.push("<div class='post'><h2>"+posts[i].getTitle()+"</h2><p class='post-title'>"+posts[i].getBody()+"</p></div>");
 			}
 			
@@ -41,6 +63,7 @@ define(["libFetch"],function(xhrFetch){
 	
 	
 	return {
-		getPosts: getPosts
+		getPosts: getPosts,
+		getTags: getTags
 	};
 });
